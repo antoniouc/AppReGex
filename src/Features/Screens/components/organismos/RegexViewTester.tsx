@@ -1,8 +1,9 @@
 // src/shared/organisms/RegexTesterForm.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { View } from 'react-native';
 import { ScrollView, StyleSheet } from 'react-native';
 import RegexInputField from '../molecules/RegexTesterView';
-import AppText from '../atoms/MyText';
+import MatchList from '../molecules/MatchListregex';
 
 const RegexTesterForm = () => {
   const [pattern, setPattern] = useState('');
@@ -20,8 +21,19 @@ const RegexTesterForm = () => {
     }
   };
 
+   useEffect(() => {
+    try {
+      const regex = new RegExp(pattern, 'g');
+      const found = testText.match(regex);
+      setMatches(found || []);
+    } catch (error) {
+      setMatches([]);
+    }
+  }, [pattern, testText]); 
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <View style={{ flex: 1 }}>
       <RegexInputField
         label="Expresión Regular"
         value={pattern}
@@ -33,16 +45,10 @@ const RegexTesterForm = () => {
         value={testText}
         onChangeText={handleTest}
         placeholder="Escribe algo para probar..."
-        multiline
+        multiline ={true}
       />
-      <AppText style={{ fontWeight: 'bold', marginTop: 20 }}>Coincidencias:</AppText>
-      {matches.length > 0 ? (
-        matches.map((match, i) => (
-          <AppText key={i} style={styles.match}>{match}</AppText>
-        ))
-      ) : (
-        <AppText style={styles.noMatch}>Sin coincidencias</AppText>
-      )}
+      <MatchList matches={matches} />
+      </View>
     </ScrollView>
   );
 };
@@ -51,8 +57,11 @@ export default RegexTesterForm;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: 40,
+    flexGrow: 1,
+    
   },
+
   match: {
     backgroundColor: '#c2f0c2',
     padding: 5,
