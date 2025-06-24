@@ -2,7 +2,7 @@
 import React from 'react';
 import AppText from '../atoms/MyText';
 import AppInput from '../atoms/MyInput';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 type Props = {
   label: string;
@@ -14,7 +14,7 @@ type Props = {
 
 const RegexInputField = ({ label, value, onChangeText, placeholder, multiline }: Props) => {
   return (
-    <>
+    <View>
       <AppText style={styles.text} >{label}</AppText>
       <AppInput
      style={styles.input}
@@ -24,7 +24,7 @@ const RegexInputField = ({ label, value, onChangeText, placeholder, multiline }:
         placeholder={placeholder}
         multiline={multiline}
       />
-    </>
+    </View>
   );
 };
 
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginTop: 5,
-    height: 100,
+   
     width: '100%',
     minWidth: '90%',
   },

@@ -4,12 +4,17 @@ import { View } from 'react-native';
 import { ScrollView, StyleSheet } from 'react-native';
 import RegexInputField from '../molecules/RegexTesterView';
 import MatchList from '../molecules/MatchListregex';
+import { RegexTextTesterViewModel } from '../../ViewModel/TestMatchRegex';
+import { useRegexStore } from '../../../../Store/useRegexStore';
+import { Pattern } from 'react-native-svg';
+
 
 const RegexTesterForm = () => {
-  const [pattern, setPattern] = useState('');
-  const [testText, setTestText] = useState('');
-  const [matches, setMatches] = useState<string[]>([]);
 
+  const{ pattern, setPattern, testText, setTestText } = useRegexStore();
+  const matches = RegexTextTesterViewModel(pattern, testText) || [];
+
+  /*
   const handleTest = (text: string) => {
     setTestText(text);
     try {
@@ -20,6 +25,8 @@ const RegexTesterForm = () => {
       setMatches([]);
     }
   };
+*/
+/*
 
    useEffect(() => {
     try {
@@ -29,7 +36,9 @@ const RegexTesterForm = () => {
     } catch (error) {
       setMatches([]);
     }
-  }, [pattern, testText]); 
+  }, [pattern, testText]);
+  
+  */
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -43,13 +52,15 @@ const RegexTesterForm = () => {
       <RegexInputField
         label="Texto de Prueba"
         value={testText}
-        onChangeText={handleTest}
+        onChangeText={setTestText}
         placeholder="Escribe algo para probar..."
         multiline ={true}
       />
       <MatchList matches={matches} />
       </View>
+
     </ScrollView>
+    
   );
 };
 
@@ -57,7 +68,7 @@ export default RegexTesterForm;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 40,
+    padding: 20,
     flexGrow: 1,
     
   },
