@@ -12,5 +12,5 @@ export const useRegexStore = create<RegexState>((set) => ({
   pattern: '',
   testText: '',
   setPattern: (pattern) => set({ pattern }),
-  setTestText: (text) => set({ testText: text }),
+  setTestText: (text) => set({ testText: text }), 
 }));
