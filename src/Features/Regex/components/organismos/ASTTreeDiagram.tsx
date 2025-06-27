@@ -19,7 +19,7 @@ type ASTNode =
 // };
 
 const NODE_RADIUS = 20;
-const H_SPACING = 99;
+const H_SPACING = 100;
 const V_SPACING = 80;
 
 const renderNode = (
@@ -110,13 +110,13 @@ const ASTTreeDiagram = ({ ast }: { ast: ASTNode }) => {
 
 
 
-    renderNode(ast, 400, 100, 0, 0, lines, nodes);
+    renderNode(ast, 300, 100, 0, 0, lines, nodes);
 
     return (
         <ScrollView horizontal={true}  contentContainerStyle={styles.container}>
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <View style={{width: 1200, height: 500}}>
-                    <Svg width={500} height={500}>
+                    <Svg width={800} height={500}>
                         {lines}
                         {nodes}
                     </Svg>
