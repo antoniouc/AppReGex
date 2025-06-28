@@ -5,8 +5,8 @@ import { ScrollView, StyleSheet } from 'react-native';
 import RegexInputField from '../molecules/RegexTesterView';
 import MatchList from '../molecules/MatchListregex';
 import { RegexTextTesterViewModel } from '../../ViewModel/TestMatchRegex';
-import { useRegexStore } from '../../../../Store/useRegexStore';
-import { Pattern } from 'react-native-svg';
+import { useRegexStore } from '../../../../../Store/useRegexStore';
+import { HistoryButtonNavigation } from '../molecules/HistoryButtonNavigation';
 
 
 const RegexTesterForm = () => {
@@ -56,7 +56,9 @@ const RegexTesterForm = () => {
         placeholder="Escribe algo para probar..."
         multiline ={true}
       />
+     
       <MatchList matches={matches} />
+       <HistoryButtonNavigation />
       </View>
 
     </ScrollView>

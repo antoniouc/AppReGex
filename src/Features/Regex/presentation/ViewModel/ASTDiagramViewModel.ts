@@ -1,8 +1,8 @@
 
-import { generateAST } from "../../../core/RegexParse";
-import { transformRegexpTree } from "../../../core/TranformAST";
-import { useRegexStore } from "../../../Store/useRegexStore";
-import type { ASTNode } from "../../../core/TranformAST";
+import { generateAST } from "../../../../core/RegexParse";
+import { transformRegexpTree } from "../../../../core/TranformAST";
+import { useRegexStore } from "../../../../Store/useRegexStore";
+import type { ASTNode } from "../../../../core/TranformAST";
 export const ASTDiagramviewModel = ( ): ASTNode | null => {
 
     const pattern  = useRegexStore((state) => state.pattern);

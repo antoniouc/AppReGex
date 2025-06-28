@@ -4,7 +4,7 @@ import RegexTesterForm from '../organismos/RegexViewTester';
 import ASTTreeDiagram from '../organismos/ASTTreeDiagram';
 import { ASTDiagramviewModel } from '../../ViewModel/ASTDiagramViewModel';
 
-const RegexTesterView = () => {
+export const RegexTesterScreen = () => {
  
   const ast = ASTDiagramviewModel();
   return (
@@ -14,5 +14,3 @@ const RegexTesterView = () => {
     </SafeAreaView>
   );
 };
-
-export default RegexTesterView;
