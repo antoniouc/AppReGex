@@ -57,7 +57,7 @@ const RegexTesterForm = () => {
         multiline ={true}
       />
      
-      <MatchList matches={matches} />
+      <MatchList matches={matches} originalText={testText} />
        <HistoryButtonNavigation />
       </View>
 
