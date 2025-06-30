@@ -19,8 +19,8 @@ export const DiagramButtonNavigation = () => {
     <View style={styles.container}>
       <MyButton
         onPress={handlePress}
-        icon={<MyIcon name="time-outline" size={24} color="white" />}
-        title="Diagrama de RailRoad"
+        icon={<MyIcon name="git-branch" size={24} color="white" />}
+        title="Diagrama "
       />
     </View>
   );

@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text, SafeAreaView, StyleSheet } from 'react-native';
 import RegexHistoryList from '../organismos/RegexHistoryList';
+import { useAppTheme } from '../../../../../core/useAppTheme';
 
 const HistorialScreen = () => {
+  const theme = useAppTheme();
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>🕘 Historial de Regex</Text>
+    <SafeAreaView style={{...styles.container, backgroundColor: theme.background}}>
+      <Text style={{...styles.title, color: theme.text}}>🕘 Historial de Regex</Text>
       <RegexHistoryList />
     </SafeAreaView>
   );

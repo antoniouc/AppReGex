@@ -3,6 +3,7 @@ import React from 'react';
 import AppText from '../atoms/MyText';
 import AppInput from '../atoms/MyInput';
 import { StyleSheet, View } from 'react-native';
+import { useAppTheme } from '../../../../../core/useAppTheme';
 
 type Props = {
   label: string;
@@ -13,15 +14,24 @@ type Props = {
 };
 
 const RegexInputField = ({ label, value, onChangeText, placeholder, multiline }: Props) => {
+  const theme = useAppTheme();
+
   return (
-    <View>
-      <AppText style={styles.text} >{label}</AppText>
+    <View style={{ marginBottom: 16 }}>
+      <AppText style={[styles.text, { color: theme.text }]}>{label}</AppText>
       <AppInput
-     style={styles.input}
-      
+        style={[
+          styles.input,
+          {
+            borderColor: theme.border,
+            backgroundColor: theme.inputBackground,
+            color: theme.text,
+          },
+        ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
+        placeholderTextColor={theme.text + '88'}
         multiline={multiline}
       />
     </View>
@@ -34,17 +44,12 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginTop: 5,
-   
     width: '100%',
-    minWidth: '90%',
   },
-  text:{
+  text: {
     fontWeight: 'bold',
-     marginTop: 20,
-     height: 20,
-    width: '100%',
-    minWidth: '90%',
-  }
-})
+    marginTop: 20,
+  },
+});
 
 export default RegexInputField;
