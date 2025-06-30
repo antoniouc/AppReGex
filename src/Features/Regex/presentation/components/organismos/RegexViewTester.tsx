@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet, Text } from 'react-native';
+import { View, ScrollView, StyleSheet, Text, Button } from 'react-native';
 import RegexInputField from '../molecules/RegexTesterView';
 import MatchList from '../molecules/MatchListregex';
 import { RegexTextTesterViewModel } from '../../ViewModel/TestMatchRegex';
@@ -14,6 +14,16 @@ const RegexTesterForm = () => {
   const matches = RegexTextTesterViewModel(pattern, testText) || [];
   const theme = useAppTheme();
 
+  const cargarEjemplo = () => {
+    setPattern('\\b\\d{1,2}/\\d{1,2}/\\d{4}\\b');
+    setTestText('Hoy es 30/06/2025 y mañana será 01/07/2025.');
+  };
+
+  const limpiarCampos = () => {
+    setPattern('');
+    setTestText('');
+  };
+
   return (
     <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
       <ToggleTheme />
@@ -23,7 +33,6 @@ const RegexTesterForm = () => {
           value={pattern}
           onChangeText={setPattern}
           placeholder="Ej: \\d+"
-      
         />
         <RegexInputField
           label="Texto de Prueba"
@@ -31,10 +40,19 @@ const RegexTesterForm = () => {
           onChangeText={setTestText}
           placeholder="Escribe algo para probar..."
           multiline={true}
-    
         />
 
-        <MatchList matches={matches} originalText={testText}  />
+        {/* 🔘 Botón para cargar ejemplo */}
+        <View style={styles.button}>
+          <Button title="Cargar ejemplo" onPress={cargarEjemplo} />
+        </View>
+
+        {/* 🔴 Botón para limpiar campos */}
+        <View style={styles.button}>
+          <Button title="Limpiar campos" color="#d9534f" onPress={limpiarCampos} />
+        </View>
+
+        <MatchList matches={matches} originalText={testText} />
 
         <View style={styles.buttonRow}>
           <DiagramButtonNavigation />
@@ -58,5 +76,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
     gap: 20,
+  },
+  button: {
+    marginTop: 10,
+    alignSelf: 'center',
+    width: '60%',
   },
 });

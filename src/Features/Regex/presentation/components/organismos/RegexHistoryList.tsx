@@ -1,27 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { RegexRepositoryImpl } from '../../../data/repositories_impl/RegexRepositoryImpl';
-import { GetHistoryRegex } from '../../../domain/Usecases/GetHistoryRegex';
-import { RegexApi } from '../../../data/datasource/RegexApi';
-import { Regex } from '../../../domain/entities/Regex';
+import React from 'react';
+import { View, Text, FlatList, StyleSheet, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useRegexHistoryViewModel } from '../../ViewModel/GetHistoryRegexViewModel';
+import { useRegexStore } from '../../../../../Store/useRegexStore';
 import { useAppTheme } from '../../../../../core/useAppTheme';
 
 const RegexHistoryList = () => {
+  const { history, loading } = useRegexHistoryViewModel();
+  const { setPattern } = useRegexStore();
   const theme = useAppTheme();
+  const navigation = useNavigation();
 
-  const regexApi = new RegexApi();
-  const regexRepository = new RegexRepositoryImpl(regexApi);
-  const getHistory = new GetHistoryRegex(regexRepository);
-
-  const [history, setHistory] = useState<Regex[]>([]);
-
-  useEffect(() => {
-    const fetchHistory = async () => {
-      const data = await getHistory.execute();
-      setHistory(data);
-    };
-    fetchHistory();
-  }, []);
+  if (loading) return <Text style={{ color: theme.text }}>Cargando...</Text>;
 
   if (history.length === 0) {
     return (
@@ -37,12 +27,19 @@ const RegexHistoryList = () => {
       keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={{ backgroundColor: theme.background, paddingBottom: 20 }}
       renderItem={({ item }) => (
-        <View style={[styles.item, { borderColor: theme.border }]}>
-          <Text style={[styles.pattern, { color: theme.text }]}>{item.pattern}</Text>
-          <Text style={[styles.date, { color: theme.text + '88' }]}>
-            {new Date(item.createdAt).toLocaleString()}
-          </Text>
-        </View>
+        <Pressable
+          onPress={() => {
+            setPattern(item.pattern);
+            navigation.goBack();
+          }}
+        >
+          <View style={[styles.item, { borderColor: theme.border }]}>
+            <Text style={[styles.pattern, { color: theme.text }]}>{item.pattern}</Text>
+            <Text style={[styles.date, { color: theme.text + '88' }]}>
+              {new Date(item.createdAt).toLocaleString()}
+            </Text>
+          </View>
+        </Pressable>
       )}
     />
   );

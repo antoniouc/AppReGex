@@ -1,22 +1,23 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Rect, Line, Text as SvgText, Polygon } from 'react-native-svg';
-import {
-  GestureDetector,
-  Gesture,
-} from 'react-native-gesture-handler';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
 } from 'react-native-reanimated';
+import { AstNode } from 'regexp-tree/ast';
 
 type ASTNode =
   | { type: 'Char'; value: string }
   | { type: 'Concat'; children: ASTNode[] }
   | { type: 'Alternation'; left: ASTNode; right: ASTNode }
   | { type: 'Repetition'; quantifier: string; child: ASTNode }
-  | { type: 'CharacterClass'; value: string };
+  | { type: 'CharacterClass'; value: string }
+  | { type: 'Assertion'; kind: 'start' | 'end' | 'word'; value?: string }
+  | { type: 'Dot' }
+  | { type: 'Group'; expression: ASTNode }
+  | { type: 'Quantifier'; kind: string; from: number; to?: number; greedy: boolean; expression: ASTNode };
 
 const BOX_WIDTH = 100;
 const BOX_HEIGHT = 40;
@@ -55,7 +56,6 @@ const drawArrow = (
   const rightY = baseY + ux * (arrowWidth / 2);
 
   const points = `${x2},${y2} ${leftX},${leftY} ${rightX},${rightY}`;
-
   elements.push(<Polygon key={`arrow-${key}`} points={points} fill="black" />);
 };
 
@@ -120,169 +120,108 @@ const drawLine = (
   }
 };
 
-const drawCurve = (
-  elements: React.ReactElement[],
-  startX: number,
-  startY: number,
-  midX: number,
-  midY: number,
-  endX: number,
-  endY: number,
-  key: string
-) => {
-  elements.push(
-    <Line
-      key={`${key}-v1`}
-      x1={startX}
-      y1={startY}
-      x2={startX}
-      y2={midY}
-      stroke="#000"
-      strokeWidth={2}
-    />
-  );
-  elements.push(
-    <Line
-      key={`${key}-h`}
-      x1={startX}
-      y1={midY}
-      x2={endX}
-      y2={midY}
-      stroke="#000"
-      strokeWidth={2}
-    />
-  );
-  elements.push(
-    <Line
-      key={`${key}-v2`}
-      x1={endX}
-      y1={midY}
-      x2={endX}
-      y2={endY}
-      stroke="#000"
-      strokeWidth={2}
-    />
-  );
-};
-
 const renderNode = (
   node: ASTNode,
   x: number,
   y: number,
   elements: React.ReactElement[]
 ): { x: number; y: number } => {
-  const nodeKey = `${node.type}-${x}-${y}`;
+  const key = `${node.type}-${x}-${y}`;
 
-  const label =
-    node.type === 'Char'
-      ? node.value
-      : node.type === 'CharacterClass'
-      ? `[${node.value}]`
-      : node.type === 'Repetition'
-      ? node.quantifier
-      : node.type === 'Alternation'
-      ? '|'
-      : '·';
-
-  drawBox(elements, label, x, y, nodeKey);
-
-  const leftX = x;
-  const rightX = x + BOX_WIDTH;
-  const centerY = y + BOX_HEIGHT / 2;
-
-  if (node.type === 'Char' || node.type === 'CharacterClass') {
-    drawLine(elements, leftX - H_SPACING / 2, centerY, leftX, centerY, `in-${nodeKey}`);
-    drawLine(elements, rightX, centerY, rightX + H_SPACING / 2, centerY, `out-${nodeKey}`);
-    return { x: rightX + H_SPACING, y };
+  let label = '';
+  switch (node.type) {
+    case 'Char':
+      label = node.value;
+      break;
+    case 'CharacterClass':
+      label = `[${node.value}]`;
+      break;
+    case 'Assertion':
+      if (node.kind === 'start') label = '^';
+      else if (node.kind === 'end') label = '$';
+      else if (node.kind === 'word') label = '\\b';
+      break;
+    case 'Dot':
+      label = '.';
+      break;
+    case 'Repetition':
+      label = node.quantifier;
+      break;
+    case 'Alternation':
+      label = '|';
+      break;
+    case 'Concat':
+      label = '·';
+      break;
+    case 'Group':
+      label = '(...)';
+      break;
+    case 'Quantifier':
+      label = `${node.from},${node.to ?? ''}${node.greedy ? '' : '?'}`;
+      break;
+    default:
+      label = (node as AstNode).type;
   }
 
-  if (node.type === 'Concat') {
-    drawLine(elements, leftX - H_SPACING / 2, centerY, leftX, centerY, `in-${nodeKey}`);
+  drawBox(elements, label, x, y, key);
+  const centerY = y + BOX_HEIGHT / 2;
+  const rightX = x + BOX_WIDTH;
 
+  // Entradas/salidas básicas
+  drawLine(elements, x - H_SPACING / 2, centerY, x, centerY, `in-${key}`);
+  drawLine(elements, rightX, centerY, rightX + H_SPACING / 2, centerY, `out-${key}`);
+
+  if (node.type === 'Concat') {
     let currX = x;
-    node.children.forEach((child) => {
+    node.children.forEach((child, i) => {
       const res = renderNode(child, currX, y, elements);
       currX = res.x;
     });
-
-    drawLine(elements, currX - H_SPACING / 2, centerY, currX, centerY, `out-${nodeKey}`);
-
     return { x: currX + H_SPACING / 2, y };
   }
 
   if (node.type === 'Alternation') {
     const topY = y - V_SPACING;
     const bottomY = y + V_SPACING;
-    const startX = rightX;
-    const branchX = startX + H_SPACING / 2;
+    const branchX = rightX + H_SPACING / 2;
     const endX = branchX + H_SPACING;
-
-    drawLine(elements, startX, centerY, branchX, centerY, `alt-main-${nodeKey}`, false);
-
-    drawCurve(elements, branchX, centerY, branchX, topY + BOX_HEIGHT / 2, endX, topY + BOX_HEIGHT / 2, `alt-top-${nodeKey}`);
-    drawCurve(elements, branchX, centerY, branchX, bottomY + BOX_HEIGHT / 2, endX, bottomY + BOX_HEIGHT / 2, `alt-bot-${nodeKey}`);
 
     const leftRes = renderNode(node.left, endX, topY, elements);
     const rightRes = renderNode(node.right, endX, bottomY, elements);
 
-    const mergeX = Math.max(leftRes.x, rightRes.x);
-    drawLine(elements, leftRes.x, topY + BOX_HEIGHT / 2, mergeX, topY + BOX_HEIGHT / 2, `merge-top-${nodeKey}`, false);
-    drawLine(elements, rightRes.x, bottomY + BOX_HEIGHT / 2, mergeX, bottomY + BOX_HEIGHT / 2, `merge-bot-${nodeKey}`, false);
-
-    drawLine(elements, mergeX, topY + BOX_HEIGHT / 2, mergeX, bottomY + BOX_HEIGHT / 2, `merge-vert-${nodeKey}`, false);
-
-    drawLine(elements, mergeX, centerY, mergeX + H_SPACING / 2, centerY, `alt-out-${nodeKey}`);
-
-    return { x: mergeX + H_SPACING, y };
+    return { x: Math.max(leftRes.x, rightRes.x) + H_SPACING / 2, y };
   }
 
   if (node.type === 'Repetition') {
-    drawLine(elements, leftX - H_SPACING / 2, centerY, leftX, centerY, `in-${nodeKey}`);
-
-    const childX = rightX + H_SPACING;
-    drawLine(elements, rightX, centerY, childX, centerY, `to-child-${nodeKey}`);
-
-    const childRes = renderNode(node.child, childX, y, elements);
-
-    drawLine(elements, childRes.x, centerY, childRes.x + H_SPACING / 2, centerY, `out-child-${nodeKey}`);
-
-    const loopTopY = y - V_SPACING;
-    const loopLeftX = leftX - H_SPACING / 2;
-    const loopRightX = childRes.x + H_SPACING / 2;
-
-    drawLine(elements, loopLeftX, centerY, loopLeftX, loopTopY, `loop-up-${nodeKey}`, false);
-    drawLine(elements, loopLeftX, loopTopY, loopRightX, loopTopY, `loop-top-${nodeKey}`, false);
-    drawLine(elements, loopRightX, loopTopY, loopRightX, centerY, `loop-down-${nodeKey}`, false);
-
-    drawArrow(elements, loopRightX, loopTopY, loopRightX - 10, loopTopY, `arrow-loop-top-${nodeKey}`);
-    drawArrow(elements, loopLeftX, loopTopY, loopLeftX, loopTopY + 10, `arrow-loop-left-${nodeKey}`);
-    drawArrow(elements, loopRightX, centerY, loopRightX - 10, centerY, `arrow-loop-down-${nodeKey}`);
-    drawArrow(elements, loopLeftX, centerY, loopLeftX, centerY - 10, `arrow-loop-up-${nodeKey}`);
-
-    return { x: childRes.x + H_SPACING, y };
+    return renderNode(node.child, rightX + H_SPACING, y, elements);
   }
 
-  return { x: x + BOX_WIDTH + H_SPACING, y };
+  if (node.type === 'Group') {
+    return renderNode(node.expression, rightX + H_SPACING, y, elements);
+  }
+
+  if (node.type === 'Quantifier') {
+    return renderNode(node.expression, rightX + H_SPACING, y, elements);
+  }
+
+  return { x: rightX + H_SPACING, y };
 };
 
 const RailroadDiagram = ({ ast }: { ast: ASTNode }) => {
   const elements: React.ReactElement[] = [];
   const startX = 50;
   const startY = 150;
-
   const { x: maxX } = renderNode(ast, startX, startY, elements);
 
   const svgWidth = Math.max(maxX + 100, 1000);
   const svgHeight = 400;
 
-  // Reanimated shared values
   const scale = useSharedValue(0.5);
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
   const savedTranslationX = useSharedValue(0);
   const savedTranslationY = useSharedValue(0);
 
-  // Gestos
   const pinchGesture = Gesture.Pinch().onUpdate((e) => {
     scale.value = e.scale;
   });
@@ -308,11 +247,7 @@ const RailroadDiagram = ({ ast }: { ast: ASTNode }) => {
   return (
     <View style={styles.container}>
       <GestureDetector gesture={Gesture.Simultaneous(pinchGesture, panGesture)}>
-        <AnimatedSvg
-          width={svgWidth}
-          height={svgHeight}
-          style={animatedStyle}
-        >
+        <AnimatedSvg width={svgWidth} height={svgHeight} style={animatedStyle}>
           {elements}
         </AnimatedSvg>
       </GestureDetector>

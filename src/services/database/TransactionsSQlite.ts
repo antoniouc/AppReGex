@@ -27,7 +27,7 @@ export const insertToFavorites = async (regex: Regex): Promise<Regex[] | void> =
 export const getHistory = async (): Promise<Regex[]> => {
   try {
     const db = await SQLiteConnection.getInstance();
-    const resultSet = await db.getAllAsync<Regex>(`SELECT pattern, createdAt FROM regex_histor ORDER BY createdAt DESC LIMIT 10`);
+    const resultSet = await db.getAllAsync<Regex>(`SELECT pattern, createdAt FROM regex_histor ORDER BY createdAt DESC LIMIT 20`);
     
     return resultSet;
   } catch (error) {
