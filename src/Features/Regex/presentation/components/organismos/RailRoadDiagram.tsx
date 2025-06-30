@@ -276,7 +276,7 @@ const RailroadDiagram = ({ ast }: { ast: ASTNode }) => {
   const svgHeight = 400;
 
   // Reanimated shared values
-  const scale = useSharedValue(1);
+  const scale = useSharedValue(0.5);
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
   const savedTranslationX = useSharedValue(0);
@@ -323,8 +323,10 @@ const RailroadDiagram = ({ ast }: { ast: ASTNode }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     padding: 10,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

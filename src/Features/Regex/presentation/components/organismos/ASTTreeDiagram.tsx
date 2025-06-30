@@ -122,7 +122,7 @@ const renderNode = (
 };
 
 const ASTTreeDiagram = ({ ast }: { ast: ASTNode }) => {
-  const scale = useSharedValue(1);
+  const scale = useSharedValue(0.6);
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
 
@@ -155,7 +155,8 @@ const ASTTreeDiagram = ({ ast }: { ast: ASTNode }) => {
   const lines: React.ReactElement[] = [];
 
   const { maxX, maxY } = renderNode(ast, 400, 100, 0, 0, lines, nodes);
-  const svgWidth = Math.max(1200, maxX + 100);
+const svgWidth = Math.min(Math.max(maxX + 100, 600), 1000); // entre 600 y 1000px
+
   const svgHeight = Math.max(600, maxY + 100);
 
   return (
@@ -174,11 +175,12 @@ const ASTTreeDiagram = ({ ast }: { ast: ASTNode }) => {
 
 const styles = StyleSheet.create({
   fixedContainer: {
-    overflow: 'scroll',
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
     padding: 10,
+    maxHeight: 450,
   },
 });
 
