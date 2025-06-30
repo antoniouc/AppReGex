@@ -7,6 +7,7 @@ import MatchList from '../molecules/MatchListregex';
 import { RegexTextTesterViewModel } from '../../ViewModel/TestMatchRegex';
 import { useRegexStore } from '../../../../../Store/useRegexStore';
 import { HistoryButtonNavigation } from '../molecules/HistoryButtonNavigation';
+import { DiagramButtonNavigation } from '../molecules/RailDiagrambutton';
 
 
 const RegexTesterForm = () => {
@@ -58,8 +59,14 @@ const RegexTesterForm = () => {
       />
      
       <MatchList matches={matches} originalText={testText} />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+              <DiagramButtonNavigation/>
        <HistoryButtonNavigation />
+       </View>
+
       </View>
+
+  
 
     </ScrollView>
     

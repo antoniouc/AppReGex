@@ -154,8 +154,8 @@ const ASTTreeDiagram = ({ ast }: { ast: ASTNode }) => {
   const nodes: React.ReactElement[] = [];
   const lines: React.ReactElement[] = [];
 
-  const { maxX, maxY } = renderNode(ast, 600, 100, 0, 0, lines, nodes);
-  const svgWidth = Math.max(1500, maxX + 100);
+  const { maxX, maxY } = renderNode(ast, 400, 100, 0, 0, lines, nodes);
+  const svgWidth = Math.max(1200, maxX + 100);
   const svgHeight = Math.max(600, maxY + 100);
 
   return (
